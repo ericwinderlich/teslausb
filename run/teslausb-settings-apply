@@ -46,25 +46,53 @@ wait_for_wifi () {
   return 1
 }
 
+add_hotspot_profile () {
+  nmcli connection delete "$HOTSPOT_CON" &> /dev/null || true
+  # "save no": keep the profile in memory only, NetworkManager refuses to
+  # store profiles when it was started on the read-only root fs.
+  # WPA2/CCMP only, fixed channel and PMF off: the Pi's brcmfmac chip
+  # fails to start an access point with NetworkManager's defaults.
+  nmcli connection add save no type wifi ifname wlan0 con-name "$HOTSPOT_CON" \
+    autoconnect no ssid "$HOTSPOT_SSID" \
+    802-11-wireless.mode ap 802-11-wireless.band bg 802-11-wireless.channel 6 \
+    ipv4.method shared ipv4.addresses "$HOTSPOT_IP/24" ipv6.method disabled \
+    wifi-sec.key-mgmt wpa-psk wifi-sec.proto rsn \
+    wifi-sec.pairwise ccmp wifi-sec.group ccmp wifi-sec.pmf disable \
+    wifi-sec.psk "$HOTSPOT_PASS" 2>&1
+}
+
 start_hotspot () {
   log "no wifi connection, starting setup hotspot '$HOTSPOT_SSID' (http://$HOTSPOT_IP/settings.html)"
-  nmcli connection delete "$HOTSPOT_CON" &> /dev/null || true
-  # "save no": keep the profile in memory only, the root fs is read-only
-  if ! nmcli connection add save no type wifi ifname wlan0 con-name "$HOTSPOT_CON" \
-        autoconnect no ssid "$HOTSPOT_SSID" \
-        802-11-wireless.mode ap 802-11-wireless.band bg \
-        ipv4.method shared ipv4.addresses "$HOTSPOT_IP/24" ipv6.method disabled \
-        wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$HOTSPOT_PASS" > /dev/null
-  then
-    log "could not create hotspot"
-    return 1
-  fi
-  if ! nmcli connection up "$HOTSPOT_CON" > /dev/null
-  then
-    log "could not start hotspot"
-    return 1
-  fi
-  log "setup hotspot running"
+  # the shared-mode DHCP server keeps its leases in /var/lib/NetworkManager,
+  # which lives on the (normally read-only) root fs
+  /root/bin/remountfs_rw &> /dev/null || true
+  local attempt out
+  for attempt in 1 2 3
+  do
+    if ! out=$(add_hotspot_profile)
+    then
+      log "could not create hotspot profile: $out"
+    elif out=$(nmcli -w 45 connection up "$HOTSPOT_CON" 2>&1)
+    then
+      log "setup hotspot running (attempt $attempt)"
+      return 0
+    else
+      log "could not start hotspot (attempt $attempt): $out"
+    fi
+    {
+      echo "--- nmcli device / NetworkManager log ---"
+      nmcli -t -f DEVICE,TYPE,STATE device
+      journalctl -u NetworkManager -n 30 --no-pager
+      echo "---"
+    } >> "$LOG" 2>&1
+    # a NetworkManager started on the read-only root fs is half-crippled,
+    # start it again now that the root fs is writable
+    log "restarting NetworkManager"
+    systemctl restart NetworkManager
+    sleep 10
+  done
+  log "giving up on the setup hotspot"
+  return 1
 }
 
 hotspot_wanted () {
