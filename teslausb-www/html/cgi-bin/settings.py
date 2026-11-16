@@ -95,17 +95,59 @@ def write_conf(text, set_vars, unset_vars):
         raise RuntimeError('Konnte Konfiguration nicht ersetzen: ' + r.stderr.strip())
 
 
-def wifi_connections():
-    r = run(['nmcli', '-t', '-f', 'NAME,TYPE', 'connection', 'show'])
-    names = []
+def forget_wifi():
+    """Delete every saved wifi client profile, including its password.
+
+    NetworkManager refuses to delete profiles when it was started on the
+    read-only root fs, so the profile files are removed directly and NM is
+    told to reload. Raises RuntimeError if a profile survives.
+    """
+    run(['/root/bin/remountfs_rw'])
+    r = run(['nmcli', '-t', '-f', 'NAME,TYPE,FILENAME', 'connection', 'show'])
     for line in r.stdout.splitlines():
-        # nmcli escapes ':' in names as '\:'
         parts = re.split(r'(?<!\\):', line)
-        if len(parts) >= 2 and parts[-1] == '802-11-wireless':
-            name = ':'.join(parts[:-1]).replace('\\:', ':')
-            if name not in (HOTSPOT_CON, 'TESLAUSB_AP'):
-                names.append(name)
-    return names
+        if len(parts) < 3 or parts[1] != '802-11-wireless':
+            continue
+        name = parts[0].replace('\\:', ':')
+        filename = ':'.join(parts[2:]).replace('\\:', ':')
+        if name in (HOTSPOT_CON, 'TESLAUSB_AP'):
+            continue
+        run(['nmcli', 'connection', 'delete', name])
+        if filename.startswith('/etc/NetworkManager/system-connections/'):
+            run(['rm', '-f', filename])
+    run(['nmcli', 'connection', 'reload'])
+    r = run(['grep', '-rlx', 'type=wifi', '/etc/NetworkManager/system-connections/'])
+    leftovers = []
+    for f in r.stdout.split():
+        mode = run(['grep', '-x', 'mode=ap', f]).returncode == 0
+        if not mode:
+            leftovers.append(f)
+    if leftovers:
+        raise RuntimeError('Konnte gespeicherte WLANs nicht löschen: ' + ', '.join(leftovers))
+    run(['sync'])
+
+
+def write_wifi_profile(ssid, psk):
+    """Write the NetworkManager profile for the new wifi directly to disk.
+
+    NetworkManager can't add profiles while it runs on the read-only root
+    fs, and neither can rc.local's "nmcli device wifi connect" at boot. So
+    the keyfile is generated offline and placed in system-connections,
+    NetworkManager picks it up on the next boot.
+    """
+    r = run(['nmcli', '--offline', 'connection', 'add', 'type', 'wifi',
+             'con-name', 'teslausb-wifi', 'ifname', 'wlan0', 'ssid', ssid,
+             '802-11-wireless.hidden', 'yes',
+             'wifi-sec.key-mgmt', 'wpa-psk', 'wifi-sec.psk', psk,
+             'connection.autoconnect', 'yes'])
+    if r.returncode != 0 or '[wifi-security]' not in r.stdout:
+        raise RuntimeError('Konnte WLAN-Profil nicht erzeugen: ' + (r.stderr or r.stdout).strip())
+    path = '/etc/NetworkManager/system-connections/teslausb-wifi.nmconnection'
+    w = run(['tee', path], input_text=r.stdout)
+    if w.returncode != 0:
+        raise RuntimeError('Konnte WLAN-Profil nicht speichern: ' + w.stderr.strip())
+    run(['chmod', '600', path])
+    run(['chown', 'root:root', path])
 
 
 def network_state():
@@ -253,15 +295,24 @@ def do_save(form):
         return
 
     if wifi_changed:
-        # forget the old networks, rc.local connects to the new one on the next boot
-        for name in wifi_connections():
-            run(['nmcli', 'connection', 'delete', name])
-        run(['rm', '-f', os.path.join(BOOT, 'WIFI_ENABLED')])
+        # forget the old networks and store the new one; NetworkManager
+        # connects to it on the next boot
+        try:
+            forget_wifi()
+            write_wifi_profile(ssid, wifipass)
+        except RuntimeError as e:
+            respond('500 Internal Server Error', {'ok': False, 'errors': [str(e)]})
+            return
+        # WIFI_ENABLED keeps rc.local from trying (and failing) to add the
+        # network itself; WIFI_UNVERIFIED re-opens the setup hotspot if the
+        # new network can't be reached (typo in the password, out of range)
+        run(['touch', os.path.join(BOOT, 'WIFI_ENABLED'), os.path.join(BOOT, 'WIFI_UNVERIFIED')])
     if setup_changed:
         run(['touch', os.path.join(BOOT, 'TESLAUSB_RECONFIGURE')])
     run(['rm', '-f', os.path.join(BOOT, 'SETUP_HOTSPOT')])
 
     rebooting = wifi_changed or setup_changed or boot_flag('TESLAUSB_RECONFIGURE')
+    run(['sync'])
     if rebooting:
         schedule(['/sbin/reboot'])
     respond('200 OK', {'ok': True, 'wifi_changed': wifi_changed, 'setup_changed': setup_changed,
@@ -280,11 +331,15 @@ def do_handover():
     except RuntimeError as e:
         respond('500 Internal Server Error', {'ok': False, 'errors': [str(e)]})
         return
-    for name in wifi_connections():
-        run(['nmcli', 'connection', 'delete', name])
-    run(['rm', '-f', os.path.join(BOOT, 'WIFI_ENABLED')])
+    try:
+        forget_wifi()
+    except RuntimeError as e:
+        respond('500 Internal Server Error', {'ok': False, 'errors': [str(e)]})
+        return
+    run(['rm', '-f', os.path.join(BOOT, 'WIFI_UNVERIFIED')])
     # the new owner's first save always re-runs setup, so no old archive config survives
     run(['touch', os.path.join(BOOT, 'SETUP_HOTSPOT'), os.path.join(BOOT, 'TESLAUSB_RECONFIGURE')])
+    run(['sync'])
     schedule(['/sbin/poweroff'])
     respond('200 OK', {'ok': True})
 

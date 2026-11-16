@@ -69,6 +69,7 @@ start_hotspot () {
 
 hotspot_wanted () {
   [ -e /teslausb/SETUP_HOTSPOT ] && return 0
+  [ -e /teslausb/WIFI_UNVERIFIED ] && return 0
   [ ! -e /teslausb/WIFI_ENABLED ] && return 0
   [ -z "$(wifi_profiles)" ] && return 0
   return 1
@@ -76,6 +77,13 @@ hotspot_wanted () {
 
 if wait_for_wifi "$WAIT_SECONDS"
 then
+  if [ -e /teslausb/WIFI_UNVERIFIED ]
+  then
+    log "connected to the new wifi"
+    /root/bin/remountfs_rw &> /dev/null
+    rm -f /teslausb/WIFI_UNVERIFIED
+    sync
+  fi
   if [ -e /teslausb/TESLAUSB_RECONFIGURE ]
   then
     if [ -e /teslausb/TESLAUSB_SETUP_FINISHED ] && [ -x /root/bin/setup-teslausb ]
@@ -83,6 +91,7 @@ then
       log "applying changed settings: running 'setup-teslausb upgrade'"
       /root/bin/remountfs_rw
       rm -f /teslausb/TESLAUSB_RECONFIGURE
+      sync
       # upgrade re-downloads everything from REPO/BRANCH and reboots when done
       NO_REBOOT_PROMPT=1 /root/bin/setup-teslausb upgrade < /dev/null >> "$LOG" 2>&1 ||
         log "setup-teslausb upgrade failed, see log above"
