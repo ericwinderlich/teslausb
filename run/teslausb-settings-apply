@@ -17,6 +17,11 @@ HOTSPOT_IP=10.42.0.1
 WAIT_SECONDS=${SETUP_WAIT_SECONDS:-120}
 
 log () {
+  # /teslausb is mounted read-only after setup, make it writable for the log
+  if [ ! -w "$LOG" ] || findmnt -no OPTIONS /teslausb/ 2> /dev/null | grep -q '^ro'
+  then
+    /root/bin/remountfs_rw &> /dev/null || true
+  fi
   echo "$(date) : settings: $1" >> "$LOG" 2> /dev/null
   echo "settings: $1"
 }
