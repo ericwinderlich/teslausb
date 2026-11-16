@@ -17,6 +17,12 @@ server {
         auth_basic_user_file /etc/nginx/.htpasswd;
     }
 
+    # captive portal checks of phones/laptops (only reach the Pi while the
+    # setup hotspot is running): send them to the settings page
+    location ~ ^/(generate_204|gen_204|hotspot-detect\.html|library/test/success\.html|connecttest\.txt|ncsi\.txt|redirect|canonical\.html|success\.txt)$ {
+        return 302 http://10.42.0.1/settings.html;
+    }
+
     location /cgi-bin/ {
          auth_basic off;
          auth_basic_user_file /etc/nginx/.htpasswd;

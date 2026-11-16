@@ -1,0 +1,97 @@
+#!/bin/bash
+#
+# Runs once at boot (teslausb-settings.service), after rc.local.
+#
+# - If the Pi has no usable wifi (handed over to a new owner, or the wifi
+#   entered on the settings page can't be reached), open the setup hotspot
+#   "TeslaUSB-Setup" so the settings page can be reached at http://10.42.0.1/
+# - If settings that need a re-run of setup were changed on the settings
+#   page (flag file /teslausb/TESLAUSB_RECONFIGURE), run
+#   "setup-teslausb upgrade" once wifi is up.
+
+LOG=/teslausb/teslausb-headless-setup.log
+HOTSPOT_CON=TESLAUSB_SETUP
+HOTSPOT_SSID=${SETUP_HOTSPOT_SSID:-TeslaUSB-Setup}
+HOTSPOT_PASS=${SETUP_HOTSPOT_PASS:-teslausb}
+HOTSPOT_IP=10.42.0.1
+WAIT_SECONDS=${SETUP_WAIT_SECONDS:-120}
+
+log () {
+  echo "$(date) : settings: $1" >> "$LOG" 2> /dev/null
+  echo "settings: $1"
+}
+
+# list "TYPE:NAME" of wifi client connections (not our hotspot / the AP)
+wifi_profiles () {
+  nmcli -t -f TYPE,NAME connection show "$@" 2> /dev/null |
+    awk -F: -v h="$HOTSPOT_CON" '$1 == "802-11-wireless" && $2 != h && $2 != "TESLAUSB_AP"'
+}
+
+wifi_connected () {
+  [ -n "$(wifi_profiles --active)" ]
+}
+
+wait_for_wifi () {
+  local i
+  for ((i = 0; i < $1; i++))
+  do
+    wifi_connected && return 0
+    sleep 1
+  done
+  return 1
+}
+
+start_hotspot () {
+  log "no wifi connection, starting setup hotspot '$HOTSPOT_SSID' (http://$HOTSPOT_IP/settings.html)"
+  nmcli connection delete "$HOTSPOT_CON" &> /dev/null || true
+  # "save no": keep the profile in memory only, the root fs is read-only
+  if ! nmcli connection add save no type wifi ifname wlan0 con-name "$HOTSPOT_CON" \
+        autoconnect no ssid "$HOTSPOT_SSID" \
+        802-11-wireless.mode ap 802-11-wireless.band bg \
+        ipv4.method shared ipv4.addresses "$HOTSPOT_IP/24" ipv6.method disabled \
+        wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$HOTSPOT_PASS" > /dev/null
+  then
+    log "could not create hotspot"
+    return 1
+  fi
+  if ! nmcli connection up "$HOTSPOT_CON" > /dev/null
+  then
+    log "could not start hotspot"
+    return 1
+  fi
+  log "setup hotspot running"
+}
+
+hotspot_wanted () {
+  [ -e /teslausb/SETUP_HOTSPOT ] && return 0
+  [ ! -e /teslausb/WIFI_ENABLED ] && return 0
+  [ -z "$(wifi_profiles)" ] && return 0
+  return 1
+}
+
+if wait_for_wifi "$WAIT_SECONDS"
+then
+  if [ -e /teslausb/TESLAUSB_RECONFIGURE ]
+  then
+    if [ -e /teslausb/TESLAUSB_SETUP_FINISHED ] && [ -x /root/bin/setup-teslausb ]
+    then
+      log "applying changed settings: running 'setup-teslausb upgrade'"
+      /root/bin/remountfs_rw
+      rm -f /teslausb/TESLAUSB_RECONFIGURE
+      # upgrade re-downloads everything from REPO/BRANCH and reboots when done
+      NO_REBOOT_PROMPT=1 /root/bin/setup-teslausb upgrade < /dev/null >> "$LOG" 2>&1 ||
+        log "setup-teslausb upgrade failed, see log above"
+    else
+      log "setup not finished yet, leaving reconfiguration to rc.local"
+    fi
+  fi
+  exit 0
+fi
+
+if hotspot_wanted
+then
+  start_hotspot
+else
+  log "no wifi in range, hotspot not needed (normal when away from home)"
+fi
+exit 0

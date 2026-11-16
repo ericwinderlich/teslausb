@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+<title>TeslaUSB Einstellungen</title>
+<style>
+:root {
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #5b636e;
+  --border: #d4d8de;
+  --accent: #cc0000;
+  --accent-text: #ffffff;
+  --ok-bg: #e7f6ec;
+  --ok-text: #135e2b;
+  --err-bg: #fdecec;
+  --err-text: #8a1c1c;
+  --info-bg: #eef3fb;
+  --info-text: #1d3f73;
+  --input-bg: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171a;
+    --card: #1f2226;
+    --text: #e6e8eb;
+    --muted: #9aa2ad;
+    --border: #3a3f46;
+    --accent: #e53935;
+    --ok-bg: #173523;
+    --ok-text: #9be0b0;
+    --err-bg: #3d1a1a;
+    --err-text: #f3a5a5;
+    --info-bg: #1a2a40;
+    --info-text: #a9c6ef;
+    --input-bg: #15171a;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+header h1 { font-size: 19px; margin: 0; }
+header a { color: var(--muted); text-decoration: none; font-size: 15px; }
+main { max-width: 640px; margin: 0 auto; padding: 16px; }
+section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+h2 { font-size: 17px; margin: 0 0 12px; }
+label { display: block; font-weight: 600; margin: 12px 0 4px; font-size: 15px; }
+.hint { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+input[type=text], input[type=password], select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+.pw { display: flex; gap: 8px; }
+.pw input { flex: 1; }
+.pw button { flex: none; }
+.choice { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice label {
+  flex: 1 1 200px;
+  margin: 0;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.choice input { margin-right: 8px; }
+.choice label:has(input:checked) { border-color: var(--accent); }
+button {
+  font: inherit;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; width: 100%; padding: 13px; }
+button.danger { border-color: var(--accent); color: var(--accent); }
+button:disabled { opacity: .55; cursor: default; }
+.status { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 15px; }
+.status dt { color: var(--muted); }
+.status dd { margin: 0; overflow-wrap: anywhere; }
+.msg { border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; display: none; }
+.msg.show { display: block; }
+.msg.ok { background: var(--ok-bg); color: var(--ok-text); }
+.msg.err { background: var(--err-bg); color: var(--err-text); }
+.msg.info { background: var(--info-bg); color: var(--info-text); }
+.msg ul { margin: 6px 0 0; padding-left: 20px; }
+#cifs { display: none; }
+#cifs.show { display: block; }
+.badge { display: inline-block; font-size: 12.5px; padding: 1px 8px; border-radius: 99px; background: var(--info-bg); color: var(--info-text); }
+</style>
+</head>
+<body>
+<header>
+  <h1>TeslaUSB Einstellungen</h1>
+  <a href="/">&larr; Zurück</a>
+</header>
+<main>
+  <div id="msg" class="msg"></div>
+
+  <section>
+    <h2>Status</h2>
+    <dl class="status" id="status"><dt>Lade …</dt><dd></dd></dl>
+  </section>
+
+  <form id="form" autocomplete="off">
+    <section>
+      <h2>WLAN</h2>
+      <p class="hint" style="margin-top:0">Das WLAN, in dem das Auto zuhause parkt. Nur 2,4 GHz.</p>
+      <label for="ssid">WLAN-Name</label>
+      <input type="text" id="ssid" name="ssid" list="networks" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      <datalist id="networks"></datalist>
+      <div class="hint" id="networks-hint"></div>
+      <label for="wifipass">WLAN-Passwort</label>
+      <div class="pw">
+        <input type="password" id="wifipass" name="wifipass" autocomplete="new-password">
+        <button type="button" data-toggle="wifipass">Zeigen</button>
+      </div>
+      <div class="hint" id="wifipass-hint"></div>
+    </section>
+
+    <section>
+      <h2>Aufnahmen archivieren</h2>
+      <div class="choice">
+        <label><input type="radio" name="archive_system" value="none"> Kein Archiv</label>
+        <label><input type="radio" name="archive_system" value="cifs"> NAS / Windows-Freigabe</label>
+      </div>
+      <div class="hint">Mit Archiv kopiert TeslaUSB gespeicherte und Wächter-Clips automatisch aufs NAS, sobald das Auto im WLAN ist.</div>
+      <div id="cifs">
+        <label for="archive_server">NAS-Adresse</label>
+        <input type="text" id="archive_server" name="archive_server" placeholder="z. B. 192.168.178.20" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label for="share_name">Freigegebener Ordner</label>
+        <input type="text" id="share_name" name="share_name" placeholder="z. B. TeslaCam" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <div class="hint">Name der Freigabe, optional mit Unterordner: <code>TeslaCam/Clips</code></div>
+        <label for="share_user">NAS-Benutzer</label>
+        <input type="text" id="share_user" name="share_user" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label for="share_password">NAS-Passwort</label>
+        <div class="pw">
+          <input type="password" id="share_password" name="share_password" autocomplete="new-password">
+          <button type="button" data-toggle="share_password">Zeigen</button>
+        </div>
+        <div class="hint" id="share_password-hint"></div>
+        <label for="cifs_version">SMB-Version <span class="badge">optional</span></label>
+        <select id="cifs_version" name="cifs_version">
+          <option value="">automatisch</option>
+          <option value="3.0">3.0</option>
+          <option value="2.1">2.1</option>
+          <option value="2.0">2.0</option>
+          <option value="1.0">1.0 (sehr alte NAS)</option>
+        </select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Zeitzone</h2>
+      <select id="time_zone" name="time_zone">
+        <option value="Europe/Berlin">Deutschland (Europe/Berlin)</option>
+        <option value="Europe/Vienna">Österreich (Europe/Vienna)</option>
+        <option value="Europe/Zurich">Schweiz (Europe/Zurich)</option>
+        <option value="Europe/Amsterdam">Niederlande (Europe/Amsterdam)</option>
+        <option value="Europe/London">Großbritannien (Europe/London)</option>
+        <option value="UTC">UTC</option>
+      </select>
+    </section>
+
+    <section>
+      <button type="submit" class="primary" id="save">Speichern &amp; anwenden</button>
+      <div class="hint" id="save-hint">Bei geändertem WLAN oder Archiv startet TeslaUSB neu und richtet sich neu ein (dauert ca. 10–15 Minuten, nicht vom Strom trennen).</div>
+    </section>
+  </form>
+
+  <section>
+    <h2>Weitergeben</h2>
+    <p class="hint" style="margin-top:0">Löscht alle gespeicherten WLANs samt Passwörtern und die NAS-Zugangsdaten und schaltet den Pi aus. Aufnahmen und Musik bleiben erhalten. Beim nächsten Einschalten öffnet er das WLAN <b>TeslaUSB-Setup</b> (Passwort <b>teslausb</b>), über das der neue Besitzer hier alles einträgt.</p>
+    <button type="button" class="danger" id="handover">Für Weitergabe vorbereiten …</button>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const CGI = 'cgi-bin/settings.py';
+let current = null;
+
+function showMsg(kind, html) {
+  const m = $('msg');
+  m.className = 'msg show ' + kind;
+  m.innerHTML = html;
+  m.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderStatus(d) {
+  const rows = [];
+  if (d.hotspot_active) {
+    rows.push(['Netz', 'Einrichtungs-Hotspot <b>TeslaUSB-Setup</b> aktiv']);
+  } else {
+    rows.push(['WLAN', d.connected_ssid ? 'verbunden mit <b>' + esc(d.connected_ssid) + '</b>' : 'nicht verbunden']);
+  }
+  const ipv4 = (d.ip || '').split(/\s+/).filter(a => /^\d+\.\d+\.\d+\.\d+$/.test(a));
+  rows.push(['IP-Adresse', esc(ipv4.join(', ') || d.ip || '–')]);
+  rows.push(['Archiv', d.archive_system === 'cifs' ? 'NAS ' + esc(d.archive_server) + ' / ' + esc(d.share_name) : 'keins']);
+  rows.push(['Einrichtung', d.reconfigure_pending ? 'Neueinrichtung steht an' : (d.setup_finished ? 'fertig' : 'läuft / unvollständig')]);
+  rows.push(['Quelle', esc(d.repo + '/' + d.branch)]);
+  $('status').innerHTML = rows.map(r => '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>').join('');
+}
+
+function setArchive(v) {
+  document.querySelectorAll('input[name=archive_system]').forEach(r => { r.checked = (r.value === v); });
+  $('cifs').classList.toggle('show', v === 'cifs');
+}
+
+function fill(d) {
+  current = d;
+  $('ssid').value = d.ssid;
+  $('wifipass').value = '';
+  $('wifipass').placeholder = d.wifipass_set ? '•••••••• (gespeichert)' : '';
+  $('wifipass-hint').textContent = d.wifipass_set ? 'Leer lassen, um das gespeicherte Passwort zu behalten.' : '';
+  setArchive(d.archive_system);
+  $('archive_server').value = d.archive_server;
+  $('share_name').value = d.share_name;
+  $('share_user').value = d.share_user;
+  $('share_password').value = '';
+  $('share_password').placeholder = d.share_password_set ? '•••••••• (gespeichert)' : '';
+  $('share_password-hint').textContent = d.share_password_set ? 'Leer lassen, um das gespeicherte Passwort zu behalten.' : '';
+  $('cifs_version').value = d.cifs_version;
+  const tz = d.time_zone || 'Europe/Berlin';
+  if (![...$('time_zone').options].some(o => o.value === tz)) {
+    $('time_zone').add(new Option(tz, tz));
+  }
+  $('time_zone').value = tz;
+  $('networks').innerHTML = d.networks.map(n => '<option value="' + esc(n.ssid) + '">').join('');
+  $('networks-hint').textContent = d.networks.length
+    ? 'In Reichweite: ' + d.networks.slice(0, 6).map(n => n.ssid).join(', ')
+    : '';
+  renderStatus(d);
+}
+
+async function load() {
+  try {
+    const r = await fetch(CGI, {cache: 'no-store'});
+    fill(await r.json());
+  } catch (e) {
+    showMsg('err', 'Einstellungen konnten nicht geladen werden: ' + esc(e.message));
+  }
+}
+
+document.querySelectorAll('input[name=archive_system]').forEach(r =>
+  r.addEventListener('change', () => setArchive(r.value)));
+
+document.querySelectorAll('button[data-toggle]').forEach(b => b.addEventListener('click', () => {
+  const i = $(b.dataset.toggle);
+  i.type = i.type === 'password' ? 'text' : 'password';
+  b.textContent = i.type === 'password' ? 'Zeigen' : 'Verbergen';
+}));
+
+$('form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const body = new URLSearchParams(new FormData($('form')));
+  body.set('action', 'save');
+  $('save').disabled = true;
+  try {
+    const r = await fetch(CGI, {method: 'POST', body});
+    const d = await r.json();
+    if (!d.ok) {
+      showMsg('err', 'Nicht gespeichert:<ul>' + d.errors.map(e => '<li>' + esc(e) + '</li>').join('') + '</ul>');
+      $('save').disabled = false;
+      return;
+    }
+    if (!d.rebooting) {
+      showMsg('ok', 'Gespeichert. Es hat sich nichts geändert, was eine Neueinrichtung braucht.');
+      $('save').disabled = false;
+      load();
+      return;
+    }
+    let text = '<b>Gespeichert.</b> TeslaUSB startet jetzt neu';
+    if (d.wifi_changed) {
+      text += ' und verbindet sich mit <b>' + esc(body.get('ssid')) + '</b>. ' +
+        'Verbinde dein Handy/PC ebenfalls mit diesem WLAN und öffne danach ' +
+        '<b>http://teslausb.local/settings.html</b>. ' +
+        'Klappt die Verbindung nicht (z. B. falsches Passwort), öffnet er nach ca. 3 Minuten wieder das WLAN <b>TeslaUSB-Setup</b>.';
+    } else {
+      text += '.';
+    }
+    if (d.setup_changed || current.reconfigure_pending || d.wifi_changed) {
+      text += '<br><br>Danach richtet er sich neu ein, das dauert etwa 10–15 Minuten. Bitte so lange nicht vom Strom trennen.';
+    }
+    showMsg('info', text);
+    if (!d.wifi_changed) waitForReturn();
+  } catch (e) {
+    showMsg('err', 'Fehler beim Speichern: ' + esc(e.message));
+    $('save').disabled = false;
+  }
+});
+
+async function waitForReturn() {
+  // poll until the Pi answers again after the reboot
+  await new Promise(r => setTimeout(r, 20000));
+  for (let i = 0; i < 120; i++) {
+    try {
+      const r = await fetch(CGI, {cache: 'no-store'});
+      if (r.ok) {
+        const d = await r.json();
+        fill(d);
+        if (!d.reconfigure_pending) {
+          showMsg('ok', 'TeslaUSB ist wieder da.');
+          $('save').disabled = false;
+          return;
+        }
+      }
+    } catch (e) { /* still rebooting */ }
+    await new Promise(r => setTimeout(r, 10000));
+  }
+}
+
+$('handover').addEventListener('click', async () => {
+  if (!confirm('Wirklich alle WLANs und NAS-Zugangsdaten löschen und den Pi ausschalten?\n\n' +
+               'Danach ist er nur noch über das WLAN "TeslaUSB-Setup" erreichbar.')) return;
+  $('handover').disabled = true;
+  try {
+    const r = await fetch(CGI, {method: 'POST', body: new URLSearchParams({action: 'handover', confirm: 'yes'})});
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.errors.join(', '));
+    showMsg('ok', '<b>Erledigt.</b> Der Pi schaltet sich jetzt aus. Warte, bis die LED aus ist (ca. 20 Sekunden), dann kannst du ihn abziehen und verschenken.<br><br>' +
+      'Für den neuen Besitzer: Pi einstecken, 3 Minuten warten, mit dem WLAN <b>TeslaUSB-Setup</b> verbinden (Passwort <b>teslausb</b>) und <b>http://10.42.0.1/settings.html</b> öffnen.');
+  } catch (e) {
+    showMsg('err', 'Fehler: ' + esc(e.message));
+    $('handover').disabled = false;
+  }
+});
+
+load();
+</script>
+</body>
+</html>

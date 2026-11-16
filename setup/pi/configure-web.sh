@@ -76,6 +76,34 @@ cat > /etc/default/fcgiwrap << EOF
 DAEMON_OPTS="-c 4 -f"
 EOF
 
+# settings page support: cgi-bin/settings.py must be executable (Windows checkouts lose the mode bit)
+chmod +x /var/www/html/cgi-bin/*.sh /var/www/html/cgi-bin/*.py 2> /dev/null || true
+
+# boot-time helper for the settings page: setup hotspot + applying changed settings
+copy_script run/teslausb-settings-apply /root/bin
+cat > /etc/systemd/system/teslausb-settings.service << EOF
+[Unit]
+Description=TeslaUSB settings: setup hotspot and apply changed settings
+After=rc-local.service NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=simple
+ExecStart=/root/bin/teslausb-settings-apply
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable teslausb-settings.service
+
+# while the setup hotspot runs, answer every DNS name with the Pi itself,
+# so phones show the "sign in to network" popup that opens the settings page
+if [ -d /etc/NetworkManager ]
+then
+  mkdir -p /etc/NetworkManager/dnsmasq-shared.d
+  echo "address=/#/10.42.0.1" > /etc/NetworkManager/dnsmasq-shared.d/teslausb-captive.conf
+fi
+
 if [ -e /backingfiles/music_disk.bin ] || [ -e /backingfiles/lightshow_disk.bin ] || [ -e /backingfiles/boombox_disk.bin ]
 then
   mkdir -p /var/www/html/fs
