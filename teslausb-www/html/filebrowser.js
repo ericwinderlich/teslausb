@@ -30,7 +30,7 @@ class FileBrowser {
           <div class="fb-dropinfo-line2"></div>
           <progress class="fb-dropinfo-progress" value="0" max="100"></progress>
           <div class="fb-dropinfo-line3"></div>
-          <button class="fb-dropinfo-cancel">Cancel</button>
+          <button class="fb-dropinfo-cancel">Abbrechen</button>
         </div>
       </div>
       <div class="fb-buttonbar">
@@ -147,7 +147,7 @@ class FileBrowser {
   newFolder() {
     var fl = this.anchor_elem.querySelector(".fb-fileslist");
     for (var i = 1; i < 100; i++) {
-      var str = `${this.current_path == "." ? "" : this.current_path + "/"}New folder${i == 1 ? '' : " (" + i + ")"}`;
+      var str = `${this.current_path == "." ? "" : this.current_path + "/"}Neuer Ordner${i == 1 ? '' : " (" + i + ")"}`;
       this.log(str);
       var item = fl.querySelector(`[data-fullpath="${this.stringEncode(str)}"]`);
       if (item == null) {
@@ -311,11 +311,11 @@ class FileBrowser {
   makeMultiSelectContextMenu(event) {
     new ContextMenu(this.anchor_elem,
       [
-        new ContextMenuItem("Download selected items",
+        new ContextMenuItem("Auswahl herunterladen",
           () => {
             this.downloadSelection();
           }, null),
-        new ContextMenuItem("Delete selected items",
+        new ContextMenuItem("Auswahl löschen",
           () => {
             this.deleteItems(this.selection());
           }, null)
@@ -326,7 +326,7 @@ class FileBrowser {
   makeListContextMenu(event) {
     new ContextMenu(this.anchor_elem,
       [
-        new ContextMenuItem("New folder", () => { this.newFolder(); }, null)
+        new ContextMenuItem("Neuer Ordner", () => { this.newFolder(); }, null)
       ]).show(...this.eventCoordinates(event));
   }
 
@@ -334,9 +334,9 @@ class FileBrowser {
     const e = event;
     new ContextMenu(this.anchor_elem,
       [
-        new ContextMenuItem("Rename", () => { this.renameItem(e.target); }, null),
-        new ContextMenuItem("Download", () => { this.downloadSelection(); }, null),
-        new ContextMenuItem("Delete", () => { this.deleteItem(e.target); }, null)
+        new ContextMenuItem("Umbenennen", () => { this.renameItem(e.target); }, null),
+        new ContextMenuItem("Herunterladen", () => { this.downloadSelection(); }, null),
+        new ContextMenuItem("Löschen", () => { this.deleteItem(e.target); }, null)
       ]).show(...this.eventCoordinates(event));
   }
 
@@ -345,10 +345,10 @@ class FileBrowser {
     const e = event;
     new ContextMenu(this.anchor_elem,
       [
-        ...this.isPotentialLockChime(event.target) ? [ new ContextMenuItem("Use as lock sound", () => { this.makeLockChime(e.target); }, null) ] : [],
-        new ContextMenuItem("Rename", () => { this.renameItem(e.target); }, null),
-        new ContextMenuItem("Download", () => { this.downloadSelection(); }, null),
-        new ContextMenuItem("Delete", () => { this.deleteItem(e.target); }, null)
+        ...this.isPotentialLockChime(event.target) ? [ new ContextMenuItem("Als Verriegelungston verwenden", () => { this.makeLockChime(e.target); }, null) ] : [],
+        new ContextMenuItem("Umbenennen", () => { this.renameItem(e.target); }, null),
+        new ContextMenuItem("Herunterladen", () => { this.downloadSelection(); }, null),
+        new ContextMenuItem("Löschen", () => { this.deleteItem(e.target); }, null)
       ]).show(...this.eventCoordinates(event));
   }
 
@@ -753,7 +753,7 @@ class FileBrowser {
 
   setDiskStats(freebytes, totalbytes) {
     var diskinfospan = this.anchor_elem.querySelector('.fb-diskinfo');
-    diskinfospan.innerText = `${this.niceNumber(freebytes)} free of ${this.niceNumber(totalbytes)}`;
+    diskinfospan.innerText = `${this.niceNumber(freebytes)} frei von ${this.niceNumber(totalbytes)}`;
   }
 
   /*
@@ -764,7 +764,7 @@ class FileBrowser {
     this.valid = (paths != null && switchtopath != null);
     if (!this.valid) {
       var pathdiv = this.anchor_elem.querySelector(".fb-dirpath");
-      pathdiv.innerText = "<< error retrieving file list >>";
+      pathdiv.innerText = "<< Fehler beim Laden der Dateiliste >>";
     }
     paths = this.valid ? paths.trimEnd() : "";
     var root = this.anchor_elem.querySelector(".fb-tree");
@@ -965,7 +965,7 @@ class FileBrowser {
     var cb = this.anchor_elem.querySelector(".fb-dropinfo-cancel");
     cb.onclick = (e) => { this.cancelDrop(); };
     var l1 = this.anchor_elem.querySelector(".fb-dropinfo-line1");
-    l1.innerText = "Building file list...";
+    l1.innerText = "Dateiliste wird erstellt …";
     l1.style.visibility="inherit";
     var p = this.anchor_elem.querySelector(".fb-dropinfo-progress");
     p.style.visibility="hidden";
@@ -987,9 +987,9 @@ class FileBrowser {
 
   updateDropInfo(numfiles, totalsize) {
     var l2 = this.anchor_elem.querySelector(".fb-dropinfo-line2");
-    var str = `${numfiles} file`;
+    var str = `${numfiles} Datei`;
     if (numfiles != 1) {
-      str += "s";
+      str += "en";
     }
     str += ", " + this.niceNumber(totalsize);
     l2.innerText = str;
@@ -1101,7 +1101,7 @@ class FileBrowser {
     if (fileList.length > 0 && ! this.cancelUpload) {
       var f = fileList.shift();
       var l1 = this.anchor_elem.querySelector(".fb-dropinfo-line1");
-      l1.innerText = `File ${l1.numitems - fileList.length} / ${l1.numitems}`;
+      l1.innerText = `Datei ${l1.numitems - fileList.length} / ${l1.numitems}`;
       var l2 = this.anchor_elem.querySelector(".fb-dropinfo-line2");
       l2.innerText = f.name;
       this.uploadFile(destpath, f,

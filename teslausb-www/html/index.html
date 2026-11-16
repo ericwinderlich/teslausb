@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head>
+<html lang="de"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
@@ -192,6 +192,10 @@ iframe {
 
 .githublink {
   font-size: 70%;
+}
+
+.settingslink {
+  text-decoration: none;
 }
 
 .tab {
@@ -818,20 +822,20 @@ video {
   <input class="tabradiobtn" type="radio" name="tabs" id="tab6">
   <input class="tabradiobtn" type="radio" name="tabs" id="tab7" checked>
   <div class="tabheaderholder">
-    <label for="tab1" class="tablabel tablabel1">Diagnostics</label>
-    <label for="tab2" class="tablabel tablabel2">Archiveloop log</label>
-    <label for="tab3" class="tablabel tablabel3">Setup log</label>
-    <label for="tab4" class="tablabel tablabel4">Tools</label>
-    <label for="tab5" class="tablabel tablabel5">Recordings</label>
-    <label for="tab6" class="tablabel tablabel6">Files</label>
-    <label for="tab7" class="tablabel tablabel7">Viewer</label>
+    <label for="tab1" class="tablabel tablabel1">Diagnose</label>
+    <label for="tab2" class="tablabel tablabel2">Archiv-Log</label>
+    <label for="tab3" class="tablabel tablabel3">Einrichtungs-Log</label>
+    <label for="tab4" class="tablabel tablabel4">Werkzeuge</label>
+    <label for="tab5" class="tablabel tablabel5">Aufnahmen</label>
+    <label for="tab6" class="tablabel tablabel6">Dateien</label>
+    <label for="tab7" class="tablabel tablabel7">Videoplayer</label>
+    <a href="settings.html" class="tablabel settingslink">Einstellungen</a>
 
     <div class="stretchable"></div>
 
-    <a href="settings.html" class="githublink">Einstellungen</a>
-    <a href="https://www.github.com/marcone/teslausb" target="_blank" class="githublink">TeslaUSB on GitHub</a>
+    <a href="https://www.github.com/marcone/teslausb" target="_blank" class="githublink">TeslaUSB auf GitHub</a>
 
-    <div class="settingsbuttondiv" title="Settings">
+    <div class="settingsbuttondiv" title="Ansicht">
       <svg class="settingsbutton" viewBox="0 0 38 38">
         <path d="M12 6l1-5c1-1 7-1 8 0l1 5a10 10 0 015 4l-16 6zM24.892 7.67l4.83-1.634c1.366.366 4.366 5.562 4 6.928l-3.83 3.366a10 10 0 01-.964 6.33L15.732 11.804zM29.892 19.67l3.83 3.366c.366 1.366-2.634 6.562-4 6.928l-4.83-1.634a10 10 0 01-5.964 2.33l2.804-16.856zM22 30l-1 5c-1 1-7 1-8 0l-1-5a10 10 0 01-5-4l16-6zM9.108 28.33l-4.83 1.634c-1.366-.366-4.366-5.562-4-6.928l3.83-3.366a10 10 0 01.964-6.33l13.196 10.856zM4.108 16.33l-3.83-3.366c-.366-1.366 2.634-6.562 4-6.928l4.83 1.634a10 10 0 015.964-2.33l-2.804 16.856z"/>
       </svg>
@@ -842,26 +846,26 @@ video {
     <div style="width:100%;height:calc(100% - 4px)">
       <pre class="mypre" id="diagnosticspre">...</pre>
       <div style="padding:4px;">
-        <button class="group1" id="diagrefreshbtn" onclick="refreshdiagnostics();">Refresh diagnostics</button>
-        <button class="group1" id="diagdwnbtn" onclick="download('diagnostics.txt', document.getElementById('diagnosticspre').textContent);">Download diagnostics</button>
+        <button class="group1" id="diagrefreshbtn" onclick="refreshdiagnostics();">Diagnose aktualisieren</button>
+        <button class="group1" id="diagdwnbtn" onclick="download('diagnostics.txt', document.getElementById('diagnosticspre').textContent);">Diagnose herunterladen</button>
       </div>
     </div>
   </div>
 
   <div class="tab content2">
     <div style="width:100%;height:calc(100% - 4px)">
-      <pre class="mypre" id="archivelooppre">Loading...</pre>
+      <pre class="mypre" id="archivelooppre">Lädt …</pre>
       <div style="padding:4px;">
-        <button class="group1" id="aldwnbtn" onclick="download('archiveloop.log', document.getElementById('archivelooppre').textContent);">Download archiveloop log</button>
+        <button class="group1" id="aldwnbtn" onclick="download('archiveloop.log', document.getElementById('archivelooppre').textContent);">Archiv-Log herunterladen</button>
       </div>
     </div>
   </div>
 
   <div class="tab content3">
     <div style="width:100%;height:calc(100% - 4px)">
-      <pre class="mypre" id="setuplogpre">Loading...</pre>
+      <pre class="mypre" id="setuplogpre">Lädt …</pre>
       <div style="padding:4px;">
-        <button class="group1" id="sudwnbtn" onclick="download('teslausb-headless-setup.log', document.getElementById('setuplogpre').textContent);">Download setup log</button>
+        <button class="group1" id="sudwnbtn" onclick="download('teslausb-headless-setup.log', document.getElementById('setuplogpre').textContent);">Einrichtungs-Log herunterladen</button>
       </div>
     </div>
   </div>
@@ -883,7 +887,7 @@ video {
           </span>
         </div>
         <div class="status_wifi">
-          <span>Wifi:
+          <span>WLAN:
             <span class="status_wifi_info">&ZeroWidthSpace;</span>
           </span>
           <span class="wifi-icon-span" title="">
@@ -904,10 +908,10 @@ video {
       </div>
       <button class="group2" id="toggledrives" onclick="toggledrivesfunc();">...</button>
       <p>
-      <button class="group2" onclick="syncfunc();">Trigger archive/sync</button>
+      <button class="group2" onclick="syncfunc();">Archivierung jetzt starten</button>
       <span id="synctext" style="padding-left:20px;"></span>
       <p>
-      <button class="group2" onclick="startspeedtest(this);" id="speedtestbutton">Run network speed test</button>
+      <button class="group2" onclick="startspeedtest(this);" id="speedtestbutton">Netzwerk-Geschwindigkeit testen</button>
       <span>
         <svg id="speedspinner" width="20" height="20" style="margin-left: 10px; vertical-align:middle;visibility:hidden;" viewBox="-12 -12 24 24">
           <g stroke-linecap="round" stroke-width="2">
@@ -928,11 +932,11 @@ video {
       </span>
       <p>
         <div id="pairingdiv">
-          <button class="group2" id="pairKey" onclick="pairBLEkey();">Pair BLE with Car</button>
+          <button class="group2" id="pairKey" onclick="pairBLEkey();">Mit dem Auto koppeln (BLE)</button>
           <span id="pairtext" style="padding-left:20px;"></span>
         </div>
       <p>
-      <button class="group2" id="rebootbutton" onclick="rebootfunc(this);">Restart Raspberry Pi</button><span id="reboottext" style="padding-left:20px;"></span>
+      <button class="group2" id="rebootbutton" onclick="rebootfunc(this);">Raspberry Pi neu starten</button><span id="reboottext" style="padding-left:20px;"></span>
     </div>
   </div>
 
@@ -950,14 +954,14 @@ video {
   <div class="tab content7">
     <div class="videoholderparent" style="width:100%;height:100%;background:#333;" onmousemove="showcontrols()">
       <div class="navbar">
-        <div class="noclips">Loading...</div>
-        <div class="subnav">RecentClips
+        <div class="noclips">Lädt …</div>
+        <div class="subnav">Letzte Clips
           <div id="RecentClips" class="subnav-content"></div>
         </div>
-        <div class="subnav">SavedClips
+        <div class="subnav">Gespeicherte Clips
           <div id="SavedClips" class="subnav-content"></div>
         </div>
-        <div class="subnav">SentryClips
+        <div class="subnav">Wächter-Clips
           <div id="SentryClips" class="subnav-content"></div>
         </div>
 
@@ -966,12 +970,12 @@ video {
             <path d="M 2 6 L 8 6 L 8 2 L 2 2 z M 10 6 L 16 6 L 16 2 L 10 2 z M 18 6 L 24 6 L 24 2 L 18 2 z M 2 12 L 8 12 L 8 8 L 2 8 z M 10 12 L 16 12 L 16 8 L 10 8 z M 18 12 L 24 12 L 24 8 L 18 8 z"/>
           </svg>
           <div id="layouts" class="subnav-content">
-            <div class="dropdownitem layoutitem" onclick="setLayout(1)">Sides on top, rear on bottom, mirrored</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(2)">Side and rear on bottom, mirrored</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(3)">Side and rear on bottom, looking back</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(4)">Mobile layout,<br>mirrored</div>
-            <div class="dropdownitem layoutitem" onclick="setLayout(5)">Mobile layout,<br>looking back</div>
-            <div class="dropdownitem layoutitem pillar" onclick="setLayout(6)">Pillars on the side</div>
+            <div class="dropdownitem layoutitem" onclick="setLayout(1)">Seiten oben, Heck unten, gespiegelt</div>
+            <div class="dropdownitem layoutitem" onclick="setLayout(2)">Seiten und Heck unten, gespiegelt</div>
+            <div class="dropdownitem layoutitem" onclick="setLayout(3)">Seiten und Heck unten, Blick nach hinten</div>
+            <div class="dropdownitem layoutitem" onclick="setLayout(4)">Handy-Ansicht,<br>gespiegelt</div>
+            <div class="dropdownitem layoutitem" onclick="setLayout(5)">Handy-Ansicht,<br>Blick nach hinten</div>
+            <div class="dropdownitem layoutitem pillar" onclick="setLayout(6)">B-Säulen seitlich</div>
           </div>
         </div>
       </div>
@@ -1033,15 +1037,15 @@ video {
   <div id="settingsoverlay" class="modaloverlay">
     <div class="modalcontent" style="max-width:500px">
       <div style="margin-bottom:10px">
-        <span>Settings</span>
+        <span>Ansicht</span>
         <span class="closebutton">&times;</span>
       </div>
       <div style="width:100%;padding:10px">
         <input type="checkbox" id="altui" name="altui" value="1">
-        <label for="altui">Use alternative web interface</label>
+        <label for="altui">Alternative Weboberfläche verwenden (englisch)</label>
       </div>
       <div style="text-align:right;padding-top:30px;">
-        <button onclick="cancelsettings()">Cancel</button> <button onclick="confirmsettings()">OK</button>
+        <button onclick="cancelsettings()">Abbrechen</button> <button onclick="confirmsettings()">OK</button>
       </div>
     </div>
   </div>
@@ -1293,7 +1297,7 @@ function starttailing({url, pre, button}) {
               }
             }
             log('could not read file "' + url + '", status: ' + request.status);
-            pre.textContent="Attempting refresh..."
+            pre.textContent="Lade neu …"
             pre.tailcorrection=0;
             readfile({url:url, pre:pre.id, button:button, tail:true});
           }
@@ -1370,7 +1374,7 @@ function callcgi(url) {
 function syncfunc() {
   callcgi('cgi-bin/trigger_sync.sh');
   var msg=document.getElementById('synctext');
-  msg.textContent="Sync triggered";
+  msg.textContent="Archivierung gestartet";
   setTimeout(function() { msg.textContent=""; }, 5000);
 }
 
@@ -1453,7 +1457,7 @@ function startspeedtest(button) {
   var spinner = document.getElementById('speedspinner');
   if (randomReader == undefined) {
     log("starting speed test");
-    button.textContent="Stop network speed test";
+    button.textContent="Geschwindigkeitstest stoppen";
     spinner.style.visibility = "inherit";
     (async () => {
       const randomStream = await fetch('cgi-bin/randomdata.sh')
@@ -1486,7 +1490,7 @@ function stopspeedtest(button, indicator, spinner) {
       log(error);
     }
     randomReader = undefined;
-    button.textContent="Run network speed test";
+    button.textContent="Netzwerk-Geschwindigkeit testen";
     indicator.textContent = "";
     spinner.style.visibility = "hidden";
   }
@@ -1501,10 +1505,10 @@ function setbuttonsdisabled(group, disabled) {
 
 function pairBLEkey() {
   var msg=document.getElementById('pairtext');
-  msg.textContent="Initiating pairing request";
+  msg.textContent="Kopplungsanfrage wird gesendet";
   var button=document.getElementById('pairKey');
   button.disabled=true;
-  button.textContent="Pairing...";
+  button.textContent="Kopple …";
   setbuttonsdisabled('group1', true);
   setbuttonsdisabled('group2', true);
 
@@ -1517,7 +1521,7 @@ function pairBLEkey() {
       let result = request.responseText;
 
       if (request.status >= 200 && request.status < 300) {
-        msg.textContent = "Pairing started. Tap keycard on center console to confirm.";
+        msg.textContent = "Kopplung gestartet. Zum Bestätigen die Schlüsselkarte auf die Mittelkonsole legen.";
         setTimeout(function () { waitforpairing(button, 0); }, 5000);
       } else {
         log("pairing failed");
@@ -1527,14 +1531,14 @@ function pairBLEkey() {
         if (matches && matches.length > 0) {
           let errorString = matches[0].replace(/<\/?p>/g, "");
           if (errorString.includes("maximum number of BLE devices")) {
-            msg.textContent = "Too many BLE devices active; turn off Bluetooth on nearby phone keys and try again.";
+            msg.textContent = "Zu viele Bluetooth-Geräte aktiv. Bluetooth an Handy-Schlüsseln in der Nähe ausschalten und erneut versuchen.";
           } else
             msg.textContent = errorString;
         } else {
-          msg.textContent = "Pairing failed. Please try again.";
+          msg.textContent = "Kopplung fehlgeschlagen. Bitte erneut versuchen.";
         }
         button.disabled = false;
-        button.textContent = "Pair BLE with Car";
+        button.textContent = "Mit dem Auto koppeln (BLE)";
         setbuttonsdisabled('group1', false);
         setbuttonsdisabled('group2', false);
      }
@@ -1562,11 +1566,11 @@ function waitforpairing(button, count) {
       if (result.indexOf("<p>paired</p>") > 0) {
         log("pairing succeeded");
         var msg=document.getElementById('pairtext');
-        msg.textContent="Successfully paired with car.";
+        msg.textContent="Erfolgreich mit dem Auto gekoppelt.";
       } else if (count > 12) {
         log("pairing failed");
         var msg=document.getElementById('pairtext');
-        msg.textContent="Pairing failed. Please try again.";
+        msg.textContent="Kopplung fehlgeschlagen. Bitte erneut versuchen.";
       } else {
         log("Still waiting for pairing");
         window.setTimeout(function() { waitforpairing(button, count + 1); }, 5000);
@@ -1574,7 +1578,7 @@ function waitforpairing(button, count) {
       }
 
       button.disabled = false;
-      button.textContent = "Pair BLE with Car";
+      button.textContent = "Mit dem Auto koppeln (BLE)";
       setbuttonsdisabled('group1', false);
       setbuttonsdisabled('group2', false);
     }
@@ -1584,7 +1588,7 @@ function waitforpairing(button, count) {
 
 function restorerebootbutton(button) {
   button.disabled=false;
-  button.textContent='Restart Raspberry Pi';
+  button.textContent='Raspberry Pi neu starten';
   button.onclick=function() { rebootfunc(button); };
 }
 
@@ -1617,13 +1621,13 @@ function realrebootfunc(button) {
   setbuttonsdisabled('group2', true);
   callcgi('cgi-bin/reboot.sh');
   var msg=document.getElementById('reboottext');
-  msg.textContent="Reboot is in progress";
+  msg.textContent="Neustart läuft";
   button.disabled=true;
   setTimeout(function() { waitforreboot(button); }, 5000);
 }
 
 function rebootfunc (button) {
-  button.textContent="Press again to confirm reboot";
+  button.textContent="Zum Bestätigen nochmal drücken";
   button.onclick=function() { realrebootfunc(button); }
   rebootbuttonresetter=setTimeout(function() { restorerebootbutton(button); }, 10000);
 }
@@ -1634,7 +1638,7 @@ async function refreshdiagnostics() {
   var pre=document.getElementById('diagnosticspre');
   btn1.disabled=true;
   btn2.disabled=true;
-  pre.textContent='Generating diagnostics...';
+  pre.textContent='Diagnose wird erstellt …';
 
   readfile({url:'cgi-bin/diagnose.sh', callback:function(value) {
     readfile({pre:'diagnosticspre', url:'diagnostics.txt', button:'diagdwnbtn'});
@@ -1651,9 +1655,9 @@ function uptimeString(secs) {
   var seconds = Math.trunc(secs % 60);
   var out = "";
   if (days == 1) {
-    out = "1 day, "
+    out = "1 Tag, "
   } else if (days > 1) {
-    out = days + " days, "
+    out = days + " Tage, "
   }
   return out + hours.toString().padStart(2, 0) + ":" +
                minutes.toString().padStart(2,0) + ":" +
@@ -1702,7 +1706,7 @@ function updateuptimeonly() {
     var status_age = (Date.now() - statusvals.retrieved);
     var uptime = Math.round(statusvals.uptime) + (status_age / 1000);
     var uptimediv = document.querySelector(".status_uptime");
-    uptimediv.innerText = "Uptime: " + uptimeString(uptime);
+    uptimediv.innerText = "Laufzeit: " + uptimeString(uptime);
   }
   if (statusvals != undefined && status_age >= max_status_age) {
     setTimeout(showstatus, 10);
@@ -1717,11 +1721,11 @@ function showstatus() {
     readfile({url:'cgi-bin/status.sh', callback:function(value) {
       statusvals=JSON.parse(value);
       statusvals.retrieved = Date.now();
-      uptimediv.innerText = "Uptime: " + uptimeString(statusvals.uptime);
+      uptimediv.innerText = "Laufzeit: " + uptimeString(statusvals.uptime);
 
       var tempdiv = document.querySelector(".status_temp");
       if (statusvals.cpu_temp != "") {
-        tempdiv.innerText = "Core temperature: " + (statusvals.cpu_temp / 1000).toFixed(1) + " C";
+        tempdiv.innerText = "CPU-Temperatur: " + (statusvals.cpu_temp / 1000).toFixed(1) + " °C";
         tempdiv.style.display = "inherit";
       } else {
         tempdiv.style.display = "none";
@@ -1729,7 +1733,7 @@ function showstatus() {
 
       var fandiv = document.querySelector(".status_fan");
       if (statusvals.fan_speed != "" && statusvals.fan_speed != "N/A") {
-        fandiv.innerText = "Fan speed: " + statusvals.fan_speed + " RPM";
+        fandiv.innerText = "Lüfter: " + statusvals.fan_speed + " RPM";
         fandiv.style.display = "inherit";
       } else {
         fandiv.style.display = "none";
@@ -1737,7 +1741,7 @@ function showstatus() {
 
       var external5vdiv = document.querySelector(".status_external_5v");
       if (statusvals.external_5v != "" && statusvals.external_5v != "N/A") {
-        external5vdiv.innerText = "External 5V: " + parseFloat(statusvals.external_5v).toFixed(3) + " V";
+        external5vdiv.innerText = "Externe 5 V: " + parseFloat(statusvals.external_5v).toFixed(3) + " V";
         external5vdiv.style.display = "inherit";
       } else {
         external5vdiv.style.display = "none";
@@ -1745,7 +1749,7 @@ function showstatus() {
 
       var rtcbattvdiv = document.querySelector(".status_rtc_batt_v");
       if (statusvals.rtc_batt_v != "" && statusvals.rtc_batt_v != "N/A" && parseFloat(statusvals.rtc_batt_v) >= 2.5) {
-        rtcbattvdiv.innerText = "RTC Battery: " + parseFloat(statusvals.rtc_batt_v).toFixed(3) + " V";
+        rtcbattvdiv.innerText = "RTC-Batterie: " + parseFloat(statusvals.rtc_batt_v).toFixed(3) + " V";
         rtcbattvdiv.style.display = "inherit";
       } else {
         rtcbattvdiv.style.display = "none";
@@ -1756,14 +1760,14 @@ function showstatus() {
         var throttledbits = parseInt(statusvals.throttled, 16);
         if (!Number.isNaN(throttledbits)) {
           var throttledflags = [
-            [0, "Undervoltage detected"],
-            [1, "Arm frequency capped"],
-            [2, "Currently throttled"],
-            [3, "Soft temperature limit active"],
-            [16, "Undervoltage has occurred since last reboot"],
-            [17, "Arm frequency capping has occurred since last reboot"],
-            [18, "Throttling has occurred since last reboot"],
-            [19, "Soft temperature limit has occurred since last reboot"]
+            [0, "Unterspannung erkannt"],
+            [1, "CPU-Takt begrenzt"],
+            [2, "Wird gerade gedrosselt"],
+            [3, "Temperaturgrenze aktiv"],
+            [16, "Seit dem letzten Neustart: Unterspannung"],
+            [17, "Seit dem letzten Neustart: CPU-Takt begrenzt"],
+            [18, "Seit dem letzten Neustart: gedrosselt"],
+            [19, "Seit dem letzten Neustart: Temperaturgrenze erreicht"]
           ];
           var throttledlines = [];
           for (var flag of throttledflags) {
@@ -1788,11 +1792,11 @@ function showstatus() {
       var togglebutton = document.getElementById("toggledrives");
       if (statusvals.drives_active != togglebutton.drives_active) {
         if (statusvals.drives_active == "yes") {
-          drivesdiv.innerText = "Drives: visible to host";
-          togglebutton.innerText = "Disconnect drives from host";
+          drivesdiv.innerText = "Laufwerke: für das Auto sichtbar";
+          togglebutton.innerText = "Laufwerke vom Auto trennen";
         } else {
-          drivesdiv.innerText = "Drives: not visible to host";
-          togglebutton.innerText = "Connect drives to host";
+          drivesdiv.innerText = "Laufwerke: für das Auto nicht sichtbar";
+          togglebutton.innerText = "Laufwerke mit dem Auto verbinden";
         }
         togglebutton.drives_active = statusvals.drives_active;
       }
@@ -1800,7 +1804,7 @@ function showstatus() {
       var drivesdiv = document.querySelector(".status_space");
       var total = statusvals.total_space;
       var used = total - statusvals.free_space;
-      drivesdiv.innerText = "Disk usage: " + spaceString(used) + " (" +
+      drivesdiv.innerText = "Speicher belegt: " + spaceString(used) + " (" +
                           (used * 100 / total).toFixed(0) + "%)";
 
       var drivesdiv = document.querySelector(".status_snapshots");
@@ -1821,7 +1825,7 @@ function showstatus() {
         var etherinfospan = document.querySelector(".status_ether_info");
         var etherinfo="";
         if (statusvals.ether_speed == "Unknown!") {
-          etherinfo = "Not connected."
+          etherinfo = "Nicht verbunden."
         } else {
           etherinfo = statusvals.ether_speed + ", " + statusvals.ether_ip;
         }
@@ -1834,14 +1838,14 @@ function showstatus() {
       var wifiicon = document.querySelector(".wifi-icon");
       var wifiiconspan = document.querySelector(".wifi-icon-span");
       if (statusvals.wifi_ssid == "") {
-        wifiinfo = "Not connected.";
+        wifiinfo = "Nicht verbunden.";
         wifiicon.attributes.strength.value = "-";
-        wifiiconspan.setAttribute("title", "Not connected");
+        wifiiconspan.setAttribute("title", "Nicht verbunden");
       } else {
         wifiinfo = statusvals.wifi_ssid + ", " +
                   (statusvals.wifi_freq/1000000000).toFixed(1) + " GHz, ";
         if (statusvals.wifi_ip == "") {
-          wifiinfo += "no IP address";
+          wifiinfo += "keine IP-Adresse";
         } else {
           wifiinfo += statusvals.wifi_ip;
         }
@@ -1849,7 +1853,7 @@ function showstatus() {
         var str = "+".repeat(1 + 3.99 * strength);
         var wifiicon = document.querySelector(".wifi-icon");
         wifiicon.attributes.strength.value = str;
-        wifiiconspan.setAttribute("title", "Signal quality: " + (strength * 100).toFixed(0) + "%");
+        wifiiconspan.setAttribute("title", "Signalqualität: " + (strength * 100).toFixed(0) + "%");
       }
       wifiinfospan.innerText = wifiinfo;
     }});
@@ -1867,7 +1871,7 @@ function readconfig() {
     if (config.has_lightshow == "yes") numdrives++;
     if (config.has_boombox == "yes") numdrives++;
     if (numdrives == 1) {
-      var filestabname = "Music"
+      var filestabname = "Musik"
       if (config.has_lightshow == "yes") filestabname = "LightShow";
       if (config.has_boombox == "yes") filestabname = "Boombox";
       filestab.innerText = filestabname;
@@ -1877,7 +1881,7 @@ function readconfig() {
 
       const fb = document.querySelector("#filebrowser");
       new FileBrowser(fb, [
-        ...config.has_music == "yes" ? [{ path: "fs/Music", label: "Music" }] : [],
+        ...config.has_music == "yes" ? [{ path: "fs/Music", label: "Musik" }] : [],
         ...config.has_lightshow == "yes" ? [{ path: "fs/LightShow", label: "LightShow" }] : [],
         ...config.has_boombox == "yes" ? [{ path: "fs/Boombox", label: "Boombox" }] : []
       ]);
@@ -2968,7 +2972,7 @@ readfile({url:'cgi-bin/videolist.sh', callback:function(value) {
   if (newestsequence != undefined) {
     newestsequence.select();
   }
-  nr.innerHTML = "No recordings";
+  nr.innerHTML = "Keine Aufnahmen";
   initialize();
 }
 });
